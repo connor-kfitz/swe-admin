@@ -1,11 +1,11 @@
 import Navbar from "./components/Navbar";
+import SignIn from "./pages/SignIn";
 
 function App() {
   return (
     <>
-    <Navbar/>
     <main>
-
+      <SignIn/>
     </main>
     </>
   );
