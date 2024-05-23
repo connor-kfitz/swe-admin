@@ -1,8 +1,8 @@
 import AuthProvider from "./contexts/AuthContext";
 import AuthGuard from "./guards/AuthGuard";
-import SignIn from "./pages/Login";
-import Products from "./pages/Products";
-import Articles from "./pages/Articles";
+import SignIn from "./pages/LoginPage";
+import Products from "./pages/ProductsPage";
+import Articles from "./pages/ArticlesPage";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {

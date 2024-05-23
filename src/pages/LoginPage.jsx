@@ -18,7 +18,7 @@ export default function Login() {
     event.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      await navigate("/products");
+      navigate("/products");
 
     } catch {
       console.log('Failed to Login');

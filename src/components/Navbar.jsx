@@ -1,4 +1,22 @@
+import React from "react"
+import { signOut } from 'firebase/auth'
+import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
+
 export default function Navbar() {
+
+  const navigate = useNavigate();
+
+  async function handleLogout(event) {
+    event.preventDefault();
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch {
+      console.log('Failed to Logout');
+    }
+  }
+
   return (
     <nav className="navbar bg-base-100 max-w-7xl m-auto">
       <div className="navbar-start">
@@ -12,7 +30,7 @@ export default function Navbar() {
         </ul>
       </div>
       <div className="navbar-end">
-        <button className="btn">Logout</button>
+        <button className="btn" onClick={handleLogout}>Logout</button>
       </div>
     </nav>
   )
