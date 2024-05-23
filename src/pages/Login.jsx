@@ -1,6 +1,36 @@
+import { useState } from "react";
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { useNavigate, Navigate } from "react-router-dom";
+import { auth } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+
 export default function Login() {
 
-  return (
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
+
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      await navigate("/products");
+
+    } catch {
+      console.log('Failed to Login');
+    }
+  }
+
+  function handleFormChange(event) {
+    const {name, value} = event.currentTarget
+    setFormData((prev) => ({...prev, [name]: value}))
+  }
+
+  return !user ? (
     <>
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -16,12 +46,14 @@ export default function Login() {
               </label>
               <div className="mt-2">
                 <input
+                  value={formData.email}
+                  onChange={handleFormChange}
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
                 />
               </div>
             </div>
@@ -33,12 +65,14 @@ export default function Login() {
               </div>
               <div className="mt-2">
                 <input
+                  value={formData.password}
+                  onChange={handleFormChange}
                   id="password"
                   name="password"
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
                 />
               </div>
             </div>
@@ -46,6 +80,7 @@ export default function Login() {
               <button
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                onClick={(event) => handleLogin(event)}
               >
                 Sign in
               </button>
@@ -54,5 +89,5 @@ export default function Login() {
         </div>
       </div>
     </>
-  )
+  ) : <Navigate to="/products"/>
 }
