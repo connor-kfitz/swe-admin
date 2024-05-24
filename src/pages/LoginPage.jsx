@@ -26,8 +26,8 @@ export default function Login() {
   }
 
   function handleFormChange(event) {
-    const {name, value} = event.currentTarget
-    setFormData((prev) => ({...prev, [name]: value}))
+    const {name, value} = event.currentTarget;
+    setFormData((prev) => ({...prev, [name]: value}));
   }
 
   return !user ? (
