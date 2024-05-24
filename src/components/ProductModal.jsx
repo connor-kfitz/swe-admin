@@ -14,6 +14,9 @@ export default function ProductModal() {
 
   const [imageUpload, setImageUpload] = useState();
 
+  const [feature, setFeature] = useState("");
+  const [features, setFeatures]= useState([]);
+
   async function uploadFile () {
     if (!imageUpload) return;
     const imageRef = ref(storage, `images/${imageUpload.name}`);
@@ -24,6 +27,18 @@ export default function ProductModal() {
   function handleFormChange(event) {
     const {name, value} = event.currentTarget
     setFormData((prev) => ({...prev, [name]: value}))
+  }
+
+  function addFeature(event) {
+    event.preventDefault();
+    if (!feature) return;
+    setFeatures((previous) => [...previous, feature]);
+    setFeature("");
+  }
+
+  function deleteFeature(event, deleteIndex) {
+    event.preventDefault();
+    setFeatures(features.filter((feature, index) => index !== deleteIndex));
   }
 
   async function addProduct(event) {
@@ -61,6 +76,24 @@ export default function ProductModal() {
                 <span className="label-text">Description:</span>
               </div>
               <textarea name="description" onChange={handleFormChange} className="textarea textarea-bordered"></textarea>
+            </label>
+            <label className="form-control w-full mb-3">
+              <div className="label"> 
+                <span className="label-text">Features:</span>
+              </div>
+              <div className="flex mb-3">
+                <input onChange={(event) => setFeature(event.target.value)} value={feature} type="text" className="input input-bordered w-full mr-4"/>
+                <button className="btn px-6" onClick={addFeature}>Add</button>
+              </div>
+              <ul>
+                {features.map((feature, index) => (
+                  <li className="flex" key={index}>
+                    <input disabled type="text" className="input input-bordered w-full mb-3 mr-4" value={feature}/>
+                    <button className="btn" onClick={(event) => deleteFeature(event, index)}>Delete</button>
+                  </li>
+                ))}
+              </ul>
+
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
