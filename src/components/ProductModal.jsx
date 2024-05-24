@@ -13,7 +13,7 @@ export default function ProductModal() {
     videoURL: '',
     images: [],
     specifications: [],
-    table: []
+    table: [["", ""], ["", ""], ["", ""]]
   })
 
   const [feature, setFeature] = useState("");
@@ -47,7 +47,7 @@ export default function ProductModal() {
   function addSpecification(event) {
     event.preventDefault();
     if (!specification) return;
-    setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications, specification]}))
+    setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications, specification]}));
     setSpecification("");
   }
 
@@ -66,6 +66,37 @@ export default function ProductModal() {
     } catch {
         console.log('Failed to add product');
     }
+  }
+
+  function addTableRow(event) {
+    event.preventDefault();
+    setPostData((previous) => ({...previous, ['table']: [...previous.table, new Array(postData.table[0].length).fill("")]}));
+  }
+
+  function addTableColumn(event) {
+    event.preventDefault();
+    const newTable = postData.table.map(row => ([...row, ""]));
+    setPostData((previous) => ({...previous, ['table']: newTable}));
+  }
+
+  function deleteTableRow(event, row) {
+    event.preventDefault();
+    if (postData.table.length <= 2) return;
+    const newTable = postData.table.filter((oldRow, index) => index !== row);
+    setPostData((previous) => ({...previous, ['table']: newTable}));
+
+  }
+
+  function deleteTableColumn(event, column) {
+    event.preventDefault();
+    if (postData.table[0].length <= 2) return;
+    const newTable = postData.table.map((oldRow) => oldRow.filter((oldColum, index) => index !== column));
+    setPostData((previous) => ({...previous, ['table']: newTable}));
+  }
+
+  function updateTableCell(event, updateRow, updateColumn) {
+    const newTable = postData.table.map((row, rowIndex) => row.map((col, colIndex) => updateRow === rowIndex && updateColumn === colIndex ? event.target.value : col));
+    setPostData((previous) => ({...previous, ['table']: newTable}));
   }
 
   return (
@@ -126,13 +157,13 @@ export default function ProductModal() {
                 ))}
               </ul>
             </label>
-            <label className="form-control w-full mb-3">
+            <label className="form-control w-full mb-6">
               <div className="label"> 
                 <span className="label-text">Video URL:</span>
               </div>
               <input name="videoURL" type="text" onChange={handleFormChange} className="input input-bordered w-full"/>
             </label>
-            <div className="App">
+            <div className="mb-3">
               <input
                 type="file"
                 onChange={(event) => {
@@ -141,6 +172,30 @@ export default function ProductModal() {
               />
               <button onClick={uploadFile}>Upload</button>
             </div>
+            <label className="form-control w-full mb-3">
+              <div className="label"> 
+                <span className="label-text">Specifications Table:</span>
+              </div>
+            </label>
+            <div className="mb-3">
+                <button className="btn mr-3" onClick={addTableRow}>Add Row</button>
+                <button className="btn" onClick={addTableColumn}>Add Column</button>
+              </div>
+              <table className="table border-2 mb-3">
+              {postData.table.map((row, rowIndex) => (
+                <tr className={rowIndex % 2 === 0 ? "bg-base-200" : null}>
+                  {row.map((cell, colIndex) => (
+                    <td className="border-2 p-0" key={colIndex}><input value={cell} onChange={(event) => updateTableCell(event, rowIndex, colIndex)} className="w-full text-center bg-inherit p-3 input rounded-none"/></td>
+                  ))}
+                  <td className="p-0 border-2"><button className="block w-full py-4 px-3" onClick={(event) => (deleteTableRow(event, rowIndex))}>Delete</button></td>
+                </tr>
+              ))}
+              <tr>
+                {Array(postData.table[0].length).fill(0).map((cell, index) => (
+                  <td className="p-0 border-2"><button className="block w-full py-4 px-3" onClick={(event) => deleteTableColumn(event, index)}>Delete</button></td>
+                ))}
+              </tr>
+              </table>
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
               <button className="btn" onClick={addProduct}>Add</button>
