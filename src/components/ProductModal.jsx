@@ -5,17 +5,20 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function ProductModal() {
 
-  const [formData, setFormData] = useState({
+  const [postData, setPostData] = useState({
     name: '',
     model: '',
     description: '',
-    videoURL: ''
+    features: [],
+    videoURL: '',
+    images: [],
+    specifications: [],
+    table: []
   })
 
-  const [imageUpload, setImageUpload] = useState();
-
   const [feature, setFeature] = useState("");
-  const [features, setFeatures]= useState([]);
+  const [specification, setSpecification] = useState("")
+  const [imageUpload, setImageUpload] = useState();
 
   async function uploadFile () {
     if (!imageUpload) return;
@@ -26,26 +29,38 @@ export default function ProductModal() {
 
   function handleFormChange(event) {
     const {name, value} = event.currentTarget
-    setFormData((prev) => ({...prev, [name]: value}))
+    setPostData((prev) => ({...prev, [name]: value}))
   }
 
   function addFeature(event) {
     event.preventDefault();
     if (!feature) return;
-    setFeatures((previous) => [...previous, feature]);
+    setPostData((previous) => ({...previous, ['features']: [...previous.features, feature]}))
     setFeature("");
   }
 
   function deleteFeature(event, deleteIndex) {
     event.preventDefault();
-    setFeatures(features.filter((feature, index) => index !== deleteIndex));
+    setPostData((previous) => ({...previous, ['features']: [...previous.features.filter((feature, index) => index !== deleteIndex)]}));
+  }
+
+  function addSpecification(event) {
+    event.preventDefault();
+    if (!specification) return;
+    setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications, specification]}))
+    setSpecification("");
+  }
+
+  function deleteSpecification(event, deleteIndex) {
+    event.preventDefault();
+    setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications.filter((specification, index) => index !== deleteIndex)]}));
   }
 
   async function addProduct(event) {
     event.preventDefault();
     try {
         await addDoc(collection(db, "products"), {
-            formData
+            postData
         })
         document.getElementById('product-modal').close()
     } catch {
@@ -86,14 +101,30 @@ export default function ProductModal() {
                 <button className="btn px-6" onClick={addFeature}>Add</button>
               </div>
               <ul>
-                {features.map((feature, index) => (
+                {postData.features.map((feature, index) => (
                   <li className="flex" key={index}>
                     <input disabled type="text" className="input input-bordered w-full mb-3 mr-4" value={feature}/>
                     <button className="btn" onClick={(event) => deleteFeature(event, index)}>Delete</button>
                   </li>
                 ))}
               </ul>
-
+            </label>
+            <label className="form-control w-full mb-3">
+              <div className="label"> 
+                <span className="label-text">Specifications:</span>
+              </div>
+              <div className="flex mb-3">
+                <input onChange={(event) => setSpecification(event.target.value)} value={specification} type="text" className="input input-bordered w-full mr-4"/>
+                <button className="btn px-6" onClick={addSpecification}>Add</button>
+              </div>
+              <ul>
+                {postData.specifications.map((specification, index) => (
+                  <li className="flex" key={index}>
+                    <input disabled type="text" className="input input-bordered w-full mb-3 mr-4" value={specification}/>
+                    <button className="btn" onClick={(event) => deleteSpecification(event, index)}>Delete</button>
+                  </li>
+                ))}
+              </ul>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
