@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { collection, addDoc } from "firebase/firestore";
-import { db } from '../firebase';
+import { db, storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function ProductModal() {
 
@@ -10,6 +11,15 @@ export default function ProductModal() {
     description: '',
     videoURL: ''
   })
+
+  const [imageUpload, setImageUpload] = useState();
+
+  async function uploadFile () {
+    if (!imageUpload) return;
+    const imageRef = ref(storage, `images/${imageUpload.name}`);
+    const upload = await uploadBytes(imageRef, imageUpload);
+    const url = await getDownloadURL(upload.ref);
+  };
 
   function handleFormChange(event) {
     const {name, value} = event.currentTarget
@@ -58,6 +68,15 @@ export default function ProductModal() {
               </div>
               <input name="videoURL" type="text" onChange={handleFormChange} className="input input-bordered w-full"/>
             </label>
+            <div className="App">
+              <input
+                type="file"
+                onChange={(event) => {
+                  setImageUpload(event.target.files[0]);
+                }}
+              />
+              <button onClick={uploadFile}>Upload</button>
+            </div>
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
               <button className="btn" onClick={addProduct}>Add</button>
