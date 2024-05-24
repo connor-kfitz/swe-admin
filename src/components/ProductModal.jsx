@@ -18,13 +18,13 @@ export default function ProductModal() {
 
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("")
-  const [imageUpload, setImageUpload] = useState();
+  const [imageUploads, setImageUploads] = useState([]);
 
   async function uploadFile () {
-    if (!imageUpload) return;
-    const imageRef = ref(storage, `images/${imageUpload.name}`);
-    const upload = await uploadBytes(imageRef, imageUpload);
-    const url = await getDownloadURL(upload.ref);
+    // if (!imageUpload) return;
+    // const imageRef = ref(storage, `images/${imageUpload.name}`);
+    // const upload = await uploadBytes(imageRef, imageUpload);
+    // const url = await getDownloadURL(upload.ref);
   };
 
   function handleFormChange(event) {
@@ -56,25 +56,20 @@ export default function ProductModal() {
     setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications.filter((specification, index) => index !== deleteIndex)]}));
   }
 
-  async function addProduct(event) {
+  function removeImage(event, deleteIndex) {
     event.preventDefault();
-    try {
-        await addDoc(collection(db, "products"), {
-            postData
-        })
-        document.getElementById('product-modal').close()
-    } catch {
-        console.log('Failed to add product');
-    }
+    setImageUploads((previous) => [...previous.filter((image, index) => index !== deleteIndex)]);
   }
 
   function addTableRow(event) {
     event.preventDefault();
+    if (postData.table.length >= 20) return;
     setPostData((previous) => ({...previous, ['table']: [...previous.table, new Array(postData.table[0].length).fill("")]}));
   }
 
   function addTableColumn(event) {
     event.preventDefault();
+    if (postData.table[0].length >= 20) return;
     const newTable = postData.table.map(row => ([...row, ""]));
     setPostData((previous) => ({...previous, ['table']: newTable}));
   }
@@ -97,6 +92,18 @@ export default function ProductModal() {
   function updateTableCell(event, updateRow, updateColumn) {
     const newTable = postData.table.map((row, rowIndex) => row.map((col, colIndex) => updateRow === rowIndex && updateColumn === colIndex ? event.target.value : col));
     setPostData((previous) => ({...previous, ['table']: newTable}));
+  }
+
+  async function addProduct(event) {
+    event.preventDefault();
+    try {
+        await addDoc(collection(db, "products"), {
+            postData
+        })
+        document.getElementById('product-modal').close()
+    } catch {
+        console.log('Failed to add product');
+    }
   }
 
   return (
@@ -163,14 +170,22 @@ export default function ProductModal() {
               </div>
               <input name="videoURL" type="text" onChange={handleFormChange} className="input input-bordered w-full"/>
             </label>
-            <div className="mb-3">
+            <div>
               <input
+                className="mb-6"
                 type="file"
                 onChange={(event) => {
-                  setImageUpload(event.target.files[0]);
+                  setImageUploads((previous) => [...previous, {file:event.target.files[0], path: URL.createObjectURL(event.target.files[0])}]);
                 }}
               />
-              <button onClick={uploadFile}>Upload</button>
+              <ul className="flex flex-wrap">
+                {imageUploads.map((image, index) => (
+                  <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
+                    <img className="" src={image.path}/>
+                    <button className="btn h-full rounded-s-none" onClick={(event) => removeImage(event, index)}>X</button>
+                  </li>
+                ))}
+              </ul>
             </div>
             <label className="form-control w-full mb-3">
               <div className="label"> 
