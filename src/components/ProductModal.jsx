@@ -175,7 +175,7 @@ export default function ProductModal() {
                 className="mb-6"
                 type="file"
                 onChange={(event) => {
-                  setImageUploads((previous) => [...previous, {file:event.target.files[0], path: URL.createObjectURL(event.target.files[0])}]);
+                  if (event.target.files[0]) setImageUploads((previous) => [...previous, {file:event.target.files[0], path: URL.createObjectURL(event.target.files[0])}]);
                 }}
               />
               <ul className="flex flex-wrap">
