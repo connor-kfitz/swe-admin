@@ -15,7 +15,6 @@ export default function AuthProvider({ children }) {
   useEffect(() => {
      let unsubscribe;
      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        console.log("CU ", currentUser);
          setLoading(false)
          if(currentUser) setUser(currentUser)
          else{setUser(null)}

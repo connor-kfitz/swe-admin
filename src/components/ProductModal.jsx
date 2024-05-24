@@ -98,11 +98,11 @@ export default function ProductModal() {
     event.preventDefault();
     try {
         await addDoc(collection(db, "products"), {
-            postData
+            ...postData, ['table']: []
         })
         document.getElementById('product-modal').close()
-    } catch {
-        console.log('Failed to add product');
+    } catch (error) {
+        console.log('Failed to add product', error);
     }
   }
 
@@ -164,7 +164,7 @@ export default function ProductModal() {
                 ))}
               </ul>
             </label>
-            <label className="form-control w-full mb-6">
+            <label className="form-control w-full mb-9">
               <div className="label"> 
                 <span className="label-text">Video URL:</span>
               </div>
@@ -192,24 +192,26 @@ export default function ProductModal() {
                 <span className="label-text">Specifications Table:</span>
               </div>
             </label>
-            <div className="mb-3">
+            <div className="mb-6">
                 <button className="btn mr-3" onClick={addTableRow}>Add Row</button>
                 <button className="btn" onClick={addTableColumn}>Add Column</button>
               </div>
               <table className="table border-2 mb-3">
-              {postData.table.map((row, rowIndex) => (
-                <tr className={rowIndex % 2 === 0 ? "bg-base-200" : null}>
-                  {row.map((cell, colIndex) => (
-                    <td className="border-2 p-0" key={colIndex}><input value={cell} onChange={(event) => updateTableCell(event, rowIndex, colIndex)} className="w-full text-center bg-inherit p-3 input rounded-none"/></td>
+                <tbody>
+                  {postData.table.map((row, rowIndex) => (
+                    <tr className={rowIndex % 2 === 0 ? "bg-base-200" : null} key={rowIndex}>
+                      {row.map((cell, colIndex) => (
+                        <td className="border-2 p-0" key={colIndex}><input value={cell} onChange={(event) => updateTableCell(event, rowIndex, colIndex)} className="w-full text-center bg-inherit p-3 input rounded-none"/></td>
+                      ))}
+                      <td className="p-0 border-2"><button className="block w-full py-4 px-3" onClick={(event) => (deleteTableRow(event, rowIndex))}>Delete</button></td>
+                    </tr>
                   ))}
-                  <td className="p-0 border-2"><button className="block w-full py-4 px-3" onClick={(event) => (deleteTableRow(event, rowIndex))}>Delete</button></td>
-                </tr>
-              ))}
-              <tr>
-                {Array(postData.table[0].length).fill(0).map((cell, index) => (
-                  <td className="p-0 border-2"><button className="block w-full py-4 px-3" onClick={(event) => deleteTableColumn(event, index)}>Delete</button></td>
-                ))}
-              </tr>
+                  <tr>
+                    {Array(postData.table[0].length).fill(0).map((cell, index) => (
+                      <td className="p-0 border-2" key={index}><button className="block w-full py-4 px-3" onClick={(event) => deleteTableColumn(event, index)}>Delete</button></td>
+                    ))}
+                  </tr>
+                </tbody>
               </table>
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
