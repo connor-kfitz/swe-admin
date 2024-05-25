@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import Navbar from "../components/Navbar"
 import ProductModal from "../components/ProductModal"
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function ProductsPage() {
@@ -16,9 +16,16 @@ export default function ProductsPage() {
     const querySnapshot = await getDocs(collection(db, "products"));
     let products = [];
     querySnapshot.forEach((doc) => {
-      products.push(doc.data());
+      let data = doc.data();
+      data['id'] = doc.id;
+      products.push(data);
     });
     setProducts(products);
+  }
+
+  async function deleteProduct(deleteProduct) {
+    await deleteDoc(doc(db, "products", deleteProduct.id));
+    setProducts((previous) => previous.filter((product) => product.id !== deleteProduct.id))
   }
 
   return (
@@ -51,7 +58,7 @@ export default function ProductsPage() {
                           <td className="whitespace-nowrap px-6 py-4">{product.name}</td>
                           <td className="whitespace-nowrap px-6 py-4">{product.model}</td>
                           <td className="whitespace-nowrap w-0">
-                            <button className="btn h-8 min-h-0 px-3 mr-3">Delete</button>
+                            <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => deleteProduct(product)}>Delete</button>
                             <button className="btn h-8 min-h-0 px-3 mr-3">Edit</button>
                           </td>
                         </tr>
