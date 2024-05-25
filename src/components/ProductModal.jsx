@@ -20,11 +20,16 @@ export default function ProductModal() {
   const [specification, setSpecification] = useState("")
   const [imageUploads, setImageUploads] = useState([]);
 
-  async function uploadFile () {
-    // if (!imageUpload) return;
-    // const imageRef = ref(storage, `images/${imageUpload.name}`);
-    // const upload = await uploadBytes(imageRef, imageUpload);
-    // const url = await getDownloadURL(upload.ref);
+  async function uploadFiles () {
+    const filePathName = postData.model.replace(/\s/g, "");
+    let imageURLs = [];
+    for (let image of imageUploads) {
+      const imageRef = ref(storage, `images/${filePathName}/${image.file.name}`);
+      const upload = await uploadBytes(imageRef, image.file);
+      const url = await getDownloadURL(upload.ref);
+      imageURLs.push(url);
+    }
+    return imageURLs;
   };
 
   function handleFormChange(event) {
@@ -97,8 +102,9 @@ export default function ProductModal() {
   async function addProduct(event) {
     event.preventDefault();
     try {
+        const imageURLs = await uploadFiles();
         await addDoc(collection(db, "products"), {
-            ...postData, ['table']: []
+            ...postData, ['table']: [], ['images']: imageURLs
         })
         document.getElementById('product-modal').close()
     } catch (error) {
