@@ -21,6 +21,7 @@ export default function ProductModal() {
   const [imageUploads, setImageUploads] = useState([]);
 
   async function uploadFiles () {
+    if (!imageUploads) return;
     const filePathName = postData.model.replace(/\s/g, "");
     let imageURLs = [];
     for (let image of imageUploads) {
@@ -40,25 +41,25 @@ export default function ProductModal() {
   function addFeature(event) {
     event.preventDefault();
     if (!feature) return;
-    setPostData((previous) => ({...previous, ['features']: [...previous.features, feature]}))
+    setPostData((previous) => ({...previous, 'features': [...previous.features, feature]}))
     setFeature("");
   }
 
   function deleteFeature(event, deleteIndex) {
     event.preventDefault();
-    setPostData((previous) => ({...previous, ['features']: [...previous.features.filter((feature, index) => index !== deleteIndex)]}));
+    setPostData((previous) => ({...previous, 'features': [...previous.features.filter((feature, index) => index !== deleteIndex)]}));
   }
 
   function addSpecification(event) {
     event.preventDefault();
     if (!specification) return;
-    setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications, specification]}));
+    setPostData((previous) => ({...previous, 'specifications': [...previous.specifications, specification]}));
     setSpecification("");
   }
 
   function deleteSpecification(event, deleteIndex) {
     event.preventDefault();
-    setPostData((previous) => ({...previous, ['specifications']: [...previous.specifications.filter((specification, index) => index !== deleteIndex)]}));
+    setPostData((previous) => ({...previous, 'specifications': [...previous.specifications.filter((specification, index) => index !== deleteIndex)]}));
   }
 
   function removeImage(event, deleteIndex) {
@@ -69,21 +70,21 @@ export default function ProductModal() {
   function addTableRow(event) {
     event.preventDefault();
     if (postData.table.length >= 20) return;
-    setPostData((previous) => ({...previous, ['table']: [...previous.table, new Array(postData.table[0].length).fill("")]}));
+    setPostData((previous) => ({...previous, 'table': [...previous.table, new Array(postData.table[0].length).fill("")]}));
   }
 
   function addTableColumn(event) {
     event.preventDefault();
     if (postData.table[0].length >= 20) return;
     const newTable = postData.table.map(row => ([...row, ""]));
-    setPostData((previous) => ({...previous, ['table']: newTable}));
+    setPostData((previous) => ({...previous, 'table': newTable}));
   }
 
   function deleteTableRow(event, row) {
     event.preventDefault();
     if (postData.table.length <= 2) return;
     const newTable = postData.table.filter((oldRow, index) => index !== row);
-    setPostData((previous) => ({...previous, ['table']: newTable}));
+    setPostData((previous) => ({...previous, 'table': newTable}));
 
   }
 
@@ -91,22 +92,24 @@ export default function ProductModal() {
     event.preventDefault();
     if (postData.table[0].length <= 2) return;
     const newTable = postData.table.map((oldRow) => oldRow.filter((oldColum, index) => index !== column));
-    setPostData((previous) => ({...previous, ['table']: newTable}));
+    setPostData((previous) => ({...previous, 'table': newTable}));
   }
 
   function updateTableCell(event, updateRow, updateColumn) {
     const newTable = postData.table.map((row, rowIndex) => row.map((col, colIndex) => updateRow === rowIndex && updateColumn === colIndex ? event.target.value : col));
-    setPostData((previous) => ({...previous, ['table']: newTable}));
+    setPostData((previous) => ({...previous, 'table': newTable}));
   }
 
   async function addProduct(event) {
     event.preventDefault();
     try {
         const imageURLs = await uploadFiles();
+        let tableAsObject = {};
+        postData.table.forEach((row, index) => { tableAsObject[index] = row });
         await addDoc(collection(db, "products"), {
-            ...postData, ['table']: [], ['images']: imageURLs
+            ...postData, 'table': tableAsObject, 'images': imageURLs
         })
-        document.getElementById('product-modal').close()
+        document.getElementById('product-modal').close();
     } catch (error) {
         console.log('Failed to add product', error);
     }
@@ -187,7 +190,7 @@ export default function ProductModal() {
               <ul className="flex flex-wrap">
                 {imageUploads.map((image, index) => (
                   <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
-                    <img className="" src={image.path}/>
+                    <img className="" src={image.path} alt="Upload Preview"/>
                     <button className="btn h-full rounded-s-none" onClick={(event) => removeImage(event, index)}>X</button>
                   </li>
                 ))}
