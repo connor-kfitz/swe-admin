@@ -28,6 +28,10 @@ export default function ProductsPage() {
     setProducts((previous) => previous.filter((product) => product.id !== deleteProduct.id))
   }
 
+  function addProductClientSide(product) {
+    setProducts((previous) => [...previous, product]);
+  }
+
   return (
     <>
       <Navbar/>
@@ -69,7 +73,7 @@ export default function ProductsPage() {
               </div>
             </div>
           </div>
-          <ProductModal/>
+          <ProductModal addProductClientSide={addProductClientSide}/>
           </div>
         </section>
       </main>

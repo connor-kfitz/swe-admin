@@ -3,7 +3,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { db, storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-export default function ProductModal() {
+export default function ProductModal({addProductClientSide}) {
 
   const [postData, setPostData] = useState({
     name: '',
@@ -106,9 +106,10 @@ export default function ProductModal() {
         const imageURLs = await uploadFiles();
         let tableAsObject = {};
         postData.table.forEach((row, index) => { tableAsObject[index] = row });
-        await addDoc(collection(db, "products"), {
+        const docRef = await addDoc(collection(db, "products"), {
             ...postData, 'table': tableAsObject, 'images': imageURLs
         })
+        addProductClientSide({...postData, 'table': tableAsObject, 'images': imageURLs, 'id': docRef.id});
         document.getElementById('product-modal').close();
     } catch (error) {
         console.log('Failed to add product', error);
