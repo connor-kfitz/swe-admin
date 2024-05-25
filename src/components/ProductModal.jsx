@@ -1,24 +1,48 @@
-import React, { useState } from 'react'
-import { collection, addDoc } from "firebase/firestore";
-import { db, storage } from '../firebase';
+import React, { useState, useEffect } from "react";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { db, storage } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-export default function ProductModal({addProductClientSide}) {
+export default function ProductModal({editProductData, setProducts}) {
 
-  const [postData, setPostData] = useState({
-    name: '',
-    model: '',
-    description: '',
-    features: [],
-    videoURL: '',
-    images: [],
-    specifications: [],
-    table: [["", ""], ["", ""], ["", ""]]
-  })
+  class Product {
+    constructor(name, model, description, features, videoURL, images, specifications, table) {
+      this.name = name;
+      this.model = model;
+      this.description = description;
+      this.features = features;
+      this.videoURL = videoURL;
+      this.images = images;
+      this.specifications = specifications;
+      this.table = table;
+    }
+  }
 
+  const [postData, setPostData] = useState(new Product("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("")
   const [imageUploads, setImageUploads] = useState([]);
+
+  useEffect(() => {
+    addModalCloseListener();
+  },[]);
+
+  useEffect(() => {
+    if (editProductData) updateEditFormField();
+  },[editProductData]);
+
+  function addModalCloseListener() {
+    document.getElementById('product-modal').addEventListener("close", () => {
+      setPostData(new Product("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
+      setFeature("");
+      setSpecification("");
+      setImageUploads([]);
+    });
+  }
+
+  function updateEditFormField() {
+    setPostData(editProductData);
+  }
 
   async function uploadFiles () {
     if (!imageUploads) return;
@@ -67,6 +91,11 @@ export default function ProductModal({addProductClientSide}) {
     setImageUploads((previous) => [...previous.filter((image, index) => index !== deleteIndex)]);
   }
 
+  function removeEditImage(event, imageSRC) {
+    event.preventDefault();
+    setPostData((previous) => ({ ...previous, 'images': [...previous.images.filter((src) => src !== imageSRC)]}));
+  }
+
   function addTableRow(event) {
     event.preventDefault();
     if (postData.table.length >= 20) return;
@@ -107,12 +136,39 @@ export default function ProductModal({addProductClientSide}) {
         let tableAsObject = {};
         postData.table.forEach((row, index) => { tableAsObject[index] = row });
         const docRef = await addDoc(collection(db, "products"), {
-            ...postData, 'table': tableAsObject, 'images': imageURLs
+            ...postData, 
+            'table': tableAsObject, 
+            'images': imageURLs
         })
-        addProductClientSide({...postData, 'table': tableAsObject, 'images': imageURLs, 'id': docRef.id});
+        setProducts((previous) => [...previous, { ...postData, 'table': tableAsObject, 'images': imageURLs, 'id': docRef.id }]);
         document.getElementById('product-modal').close();
     } catch (error) {
         console.log('Failed to add product', error);
+    }
+  }
+
+  async function editProduct(event) {
+    event.preventDefault();
+    try {
+      const imageURLs = await uploadFiles();
+      let tableAsObject = {};
+      postData.table.forEach((row, index) => { tableAsObject[index] = row });
+      await setDoc(doc(db, "products", editProductData.id), {
+        ...postData, 
+        'table': tableAsObject,
+        'images': [...postData.images, ...imageURLs]
+      });
+
+      setProducts((previous) => previous.map((product) => { 
+        if (editProductData.id === product.id) {
+          return { ...postData, 'table': tableAsObject, 'images': [...postData.images, ...imageURLs], 'id': editProductData.id }
+        } else {
+          return product
+        }
+      }))
+      document.getElementById('product-modal').close();
+    } catch (error) {
+      console.log('Failed to add product', error);
     }
   }
 
@@ -126,19 +182,19 @@ export default function ProductModal({addProductClientSide}) {
               <div className="label"> 
                 <span className="label-text">Name:</span>
               </div>
-              <input name="name" onChange={handleFormChange} type="text" className="input input-bordered w-full"/>
+              <input name="name" onChange={handleFormChange} value={postData.name} type="text" className="input input-bordered w-full"/>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
                 <span className="label-text">Model:</span>
               </div>
-              <input name="model" onChange={handleFormChange} type="text" className="input input-bordered w-full"/>
+              <input name="model" onChange={handleFormChange} value={postData.model} type="text" className="input input-bordered w-full"/>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
                 <span className="label-text">Description:</span>
               </div>
-              <textarea name="description" onChange={handleFormChange} className="textarea textarea-bordered"></textarea>
+              <textarea name="description" onChange={handleFormChange} value={postData.description} className="textarea textarea-bordered"></textarea>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
@@ -178,7 +234,7 @@ export default function ProductModal({addProductClientSide}) {
               <div className="label"> 
                 <span className="label-text">Video URL:</span>
               </div>
-              <input name="videoURL" type="text" onChange={handleFormChange} className="input input-bordered w-full"/>
+              <input name="videoURL" type="text" onChange={handleFormChange} value={postData.videoURL} className="input input-bordered w-full"/>
             </label>
             <div>
               <input
@@ -193,6 +249,12 @@ export default function ProductModal({addProductClientSide}) {
                   <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
                     <img className="" src={image.path} alt="Upload Preview"/>
                     <button className="btn h-full rounded-s-none" onClick={(event) => removeImage(event, index)}>X</button>
+                  </li>
+                ))}
+                {postData.images.map((image, index) => (
+                  <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
+                    <img className="" src={image} alt="Upload Preview"/>
+                    <button className="btn h-full rounded-s-none" onClick={(event) => removeEditImage(event, image)}>X</button>
                   </li>
                 ))}
               </ul>
@@ -213,19 +275,23 @@ export default function ProductModal({addProductClientSide}) {
                       {row.map((cell, colIndex) => (
                         <td className="border-2 p-0" key={colIndex}><input value={cell} onChange={(event) => updateTableCell(event, rowIndex, colIndex)} className="w-full text-center bg-inherit p-3 input rounded-none"/></td>
                       ))}
-                      <td className="p-0 border-2"><button className="block w-full py-4 px-3" onClick={(event) => (deleteTableRow(event, rowIndex))}>Delete</button></td>
+                      <td className="p-0 border-2"><button className="block w-full py-4 px-3 font-medium" onClick={(event) => (deleteTableRow(event, rowIndex))}>Delete</button></td>
                     </tr>
                   ))}
                   <tr>
                     {Array(postData.table[0].length).fill(0).map((cell, index) => (
-                      <td className="p-0 border-2" key={index}><button className="block w-full py-4 px-3" onClick={(event) => deleteTableColumn(event, index)}>Delete</button></td>
+                      <td className="p-0 border-2" key={index}><button className="block w-full py-4 px-3 font-medium" onClick={(event) => deleteTableColumn(event, index)}>Delete</button></td>
                     ))}
                   </tr>
                 </tbody>
               </table>
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
-              <button className="btn" onClick={addProduct}>Add</button>
+              {editProductData ? 
+                <button className="btn" onClick={editProduct}>Edit</button> 
+              : 
+                <button className="btn" onClick={addProduct}>Add</button>
+              }
             </div>
           </form>
         </div>
