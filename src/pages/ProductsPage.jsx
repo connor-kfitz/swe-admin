@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import Navbar from "../components/Navbar"
 import ProductModal from "../components/ProductModal"
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -77,9 +78,10 @@ export default function ProductsPage() {
                           <td className="whitespace-nowrap px-6 py-4">{product.name}</td>
                           <td className="whitespace-nowrap px-6 py-4">{product.model}</td>
                           <td className="whitespace-nowrap w-0">
-                            <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => deleteProduct(product)}>Delete</button>
+                            <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => document.getElementById('delete-modal').showModal()}>Delete</button>
                             <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => transformProductData(product)}>Edit</button>
                           </td>
+                          <DeleteConfirmationModal product={product} deleteProduct={deleteProduct}/>
                         </tr>
                       ))}
                     </tbody>
