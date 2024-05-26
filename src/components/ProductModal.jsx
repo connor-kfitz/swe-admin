@@ -22,6 +22,7 @@ export default function ProductModal({editProductData, setProducts}) {
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("")
   const [imageUploads, setImageUploads] = useState([]);
+  const [formErrors, setFormErrors] = useState({name: false, model: false, description: false})
 
   useEffect(() => {
     addModalCloseListener();
@@ -131,6 +132,7 @@ export default function ProductModal({editProductData, setProducts}) {
 
   async function addProduct(event) {
     event.preventDefault();
+    if (!checkEmptyFormFields()) return;
     try {
         const imageURLs = await uploadFiles();
         let tableAsObject = {};
@@ -149,6 +151,7 @@ export default function ProductModal({editProductData, setProducts}) {
 
   async function editProduct(event) {
     event.preventDefault();
+    if (!checkEmptyFormFields()) return;
     try {
       const imageURLs = await uploadFiles();
       let tableAsObject = {};
@@ -172,6 +175,12 @@ export default function ProductModal({editProductData, setProducts}) {
     }
   }
 
+  function checkEmptyFormFields() {
+    if (postData.name && postData.description && postData.model) return true;
+    setFormErrors({ name: postData.name ? false : true, model: postData.model ? false : true, description: postData.description ? false : true });
+    return false;
+  }
+
   return (
     <dialog id="product-modal" className="modal">
       <div className="modal-box max-w-4xl">
@@ -180,25 +189,28 @@ export default function ProductModal({editProductData, setProducts}) {
           <form method="dialog">
             <label className="form-control w-full mb-3">
               <div className="label"> 
-                <span className="label-text">Name:</span>
+                <span className="label-text">Name</span>
+                <span className="label-text-alt"><i>Required</i></span>
               </div>
-              <input name="name" onChange={handleFormChange} value={postData.name} type="text" className="input input-bordered w-full"/>
+              <input name="name" onChange={handleFormChange} value={postData.name} type="text" className={"input input-bordered w-full" + (formErrors.name ? " border-red-600" : "")}/>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
-                <span className="label-text">Model:</span>
+                <span className="label-text">Model</span>
+                <span className="label-text-alt"><i>Required</i></span>
               </div>
-              <input name="model" onChange={handleFormChange} value={postData.model} type="text" className="input input-bordered w-full"/>
+              <input name="model" onChange={handleFormChange} value={postData.model} type="text" className={"input input-bordered w-full" + (formErrors.model ? " border-red-600" : "")}/>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
-                <span className="label-text">Description:</span>
+                <span className="label-text">Description</span>
+                <span className="label-text-alt"><i>Required</i></span>
               </div>
-              <textarea name="description" onChange={handleFormChange} value={postData.description} className="textarea textarea-bordered"></textarea>
+              <textarea name="description" onChange={handleFormChange} value={postData.description} className={"textarea textarea-bordered" + (formErrors.description ? " border-red-600" : "")}></textarea>
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
-                <span className="label-text">Features:</span>
+                <span className="label-text">Features</span>
               </div>
               <div className="flex mb-3">
                 <input onChange={(event) => setFeature(event.target.value)} value={feature} type="text" className="input input-bordered w-full mr-4"/>
@@ -215,7 +227,7 @@ export default function ProductModal({editProductData, setProducts}) {
             </label>
             <label className="form-control w-full mb-3">
               <div className="label"> 
-                <span className="label-text">Specifications:</span>
+                <span className="label-text">Specifications</span>
               </div>
               <div className="flex mb-3">
                 <input onChange={(event) => setSpecification(event.target.value)} value={specification} type="text" className="input input-bordered w-full mr-4"/>
@@ -232,7 +244,7 @@ export default function ProductModal({editProductData, setProducts}) {
             </label>
             <label className="form-control w-full mb-9">
               <div className="label"> 
-                <span className="label-text">Video URL:</span>
+                <span className="label-text">Video URL</span>
               </div>
               <input name="videoURL" type="text" onChange={handleFormChange} value={postData.videoURL} className="input input-bordered w-full"/>
             </label>
@@ -261,7 +273,7 @@ export default function ProductModal({editProductData, setProducts}) {
             </div>
             <label className="form-control w-full mb-3">
               <div className="label"> 
-                <span className="label-text">Specifications Table:</span>
+                <span className="label-text">Specifications Table</span>
               </div>
             </label>
             <div className="mb-6">
