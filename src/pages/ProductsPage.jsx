@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import Navbar from "../components/Navbar"
 import ProductModal from "../components/ProductModal"
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
@@ -9,6 +9,8 @@ export default function ProductsPage() {
 
   const [products, setProducts] = useState([]);
   const [editProductData, setEditProductData] = useState();
+
+  const deleteProductRef = useRef({});
 
   useEffect(() => {
     getProducts();
@@ -78,10 +80,12 @@ export default function ProductsPage() {
                           <td className="whitespace-nowrap px-6 py-4 w-0">{product.name}</td>
                           <td className="whitespace-nowrap px-6 py-4">{product.model}</td>
                           <td className="whitespace-nowrap w-0">
-                            <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => document.getElementById('delete-modal').showModal()}>Delete</button>
+                            <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => {
+                              document.getElementById('delete-modal').showModal();
+                              deleteProductRef.current = product;
+                            }}>Delete</button>
                             <button className="btn h-8 min-h-0 px-3 mr-3" onClick={() => transformProductData(product)}>Edit</button>
                           </td>
-                          <DeleteConfirmationModal product={product} deleteProduct={deleteProduct}/>
                         </tr>
                       ))}
                     </tbody>
@@ -91,6 +95,7 @@ export default function ProductsPage() {
             </div>
           </div>
           <ProductModal editProductData={editProductData} setProducts={setProducts}/>
+          <DeleteConfirmationModal deleteProductRef={deleteProductRef} deleteProduct={deleteProduct} />
           </div>
         </section>
       </main>
