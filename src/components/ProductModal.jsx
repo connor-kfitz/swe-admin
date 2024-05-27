@@ -1,49 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { useState, useEffect } from "react";
 import { db, storage } from "../firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
-export default function ProductModal({editProductData, setProducts}) {
-
-  class Product {
-    constructor(name, model, description, features, videoURL, images, specifications, table) {
-      this.name = name;
-      this.model = model;
-      this.description = description;
-      this.features = features;
-      this.videoURL = videoURL;
-      this.images = images;
-      this.specifications = specifications;
-      this.table = table;
-    }
+class Product {
+  constructor(name, model, description, features, videoURL, images, specifications, table) {
+    this.name = name;
+    this.model = model;
+    this.description = description;
+    this.features = features;
+    this.videoURL = videoURL;
+    this.images = images;
+    this.specifications = specifications;
+    this.table = table;
   }
+}
+
+export default function ProductModal({ editProductData, setEditProductData, setProducts }) {
 
   const [postData, setPostData] = useState(new Product("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
+  const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false });
   const [feature, setFeature] = useState("");
-  const [specification, setSpecification] = useState("")
+  const [specification, setSpecification] = useState("");
   const [imageUploads, setImageUploads] = useState([]);
-  const [formErrors, setFormErrors] = useState({name: false, model: false, description: false})
 
   useEffect(() => {
-    addModalCloseListener();
-  },[]);
-
-  useEffect(() => {
-    if (editProductData) updateEditFormField();
-  },[editProductData]);
-
-  function addModalCloseListener() {
     document.getElementById('product-modal').addEventListener("close", () => {
       setPostData(new Product("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
       setFeature("");
       setSpecification("");
       setImageUploads([]);
+      setEditProductData(null);
     });
-  }
+  });
 
-  function updateEditFormField() {
-    setPostData(editProductData);
-  }
+  useEffect(() => {
+    if (editProductData) setPostData(editProductData);
+  }, [editProductData]);
 
   async function uploadFiles () {
     if (!imageUploads) return;
@@ -53,10 +46,17 @@ export default function ProductModal({editProductData, setProducts}) {
       const imageRef = ref(storage, `images/${filePathName}/${image.file.name}`);
       const upload = await uploadBytes(imageRef, image.file);
       const url = await getDownloadURL(upload.ref);
-      imageURLs.push(url);
+      imageURLs.push({ src: url, path: `images/${filePathName}/${image.file.name}`});
     }
     return imageURLs;
   };
+
+  async function deleteFiles(images) {
+    for (const image of images) {
+      const imageDocRef = ref(storage, image.path);
+      await deleteObject(imageDocRef);
+    }
+  }
 
   function handleFormChange(event) {
     const {name, value} = event.currentTarget
@@ -154,6 +154,8 @@ export default function ProductModal({editProductData, setProducts}) {
     if (!checkEmptyFormFields()) return;
     try {
       const imageURLs = await uploadFiles();
+      const deletedImages = editProductData.images.filter((image) => checkRemovedExistingImages(image, [...postData.images, ...imageURLs]));
+      await deleteFiles(deletedImages);
       let tableAsObject = {};
       postData.table.forEach((row, index) => { tableAsObject[index] = row });
       await setDoc(doc(db, "products", editProductData.id), {
@@ -173,6 +175,13 @@ export default function ProductModal({editProductData, setProducts}) {
     } catch (error) {
       console.log('Failed to add product', error);
     }
+  }
+
+  function checkRemovedExistingImages(image, array) {
+    for (const file of array) {
+      if (file.path === image.path) return false;
+    }
+    return true
   }
 
   function checkEmptyFormFields() {
@@ -265,7 +274,7 @@ export default function ProductModal({editProductData, setProducts}) {
                 ))}
                 {postData.images.map((image, index) => (
                   <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
-                    <img className="" src={image} alt="Upload Preview"/>
+                    <img className="" src={image.src} alt="Upload Preview"/>
                     <button className="btn h-full rounded-s-none" onClick={(event) => removeEditImage(event, image)}>X</button>
                   </li>
                 ))}

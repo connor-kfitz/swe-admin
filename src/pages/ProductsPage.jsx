@@ -3,12 +3,13 @@ import Navbar from "../components/Navbar"
 import ProductModal from "../components/ProductModal"
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
+import { ref, deleteObject } from "firebase/storage";
 
 export default function ProductsPage() {
 
   const [products, setProducts] = useState([]);
-  const [editProductData, setEditProductData] = useState();
+  const [editProductData, setEditProductData] = useState(null);
 
   const deleteProductRef = useRef({});
 
@@ -32,8 +33,16 @@ export default function ProductsPage() {
   }
 
   async function deleteProduct(deleteProduct) {
+    await deleteFiles(deleteProduct);
     await deleteDoc(doc(db, "products", deleteProduct.id));
-    setProducts((previous) => previous.filter((product) => product.id !== deleteProduct.id))
+    setProducts((previous) => previous.filter((product) => product.id !== deleteProduct.id));
+  }
+
+  async function deleteFiles(product) {
+    for (const image of product.images) {
+      const imageDocRef = ref(storage, image.path);
+      await deleteObject(imageDocRef);
+    }
   }
 
   function transformProductData(product) {
@@ -94,7 +103,7 @@ export default function ProductsPage() {
               </div>
             </div>
           </div>
-          <ProductModal editProductData={editProductData} setProducts={setProducts}/>
+          <ProductModal editProductData={editProductData} setEditProductData={setEditProductData} setProducts={setProducts}/>
           <DeleteConfirmationModal deleteProductRef={deleteProductRef} deleteProduct={deleteProduct} />
           </div>
         </section>
