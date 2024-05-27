@@ -59,14 +59,14 @@ export default function ProductModal({ editProductData, setEditProductData, setP
   }
 
   function handleFormChange(event) {
-    const {name, value} = event.currentTarget
-    setPostData((prev) => ({...prev, [name]: value}))
+    const {name, value} = event.currentTarget;
+    setPostData((prev) => ({...prev, [name]: value}));
   }
 
   function addFeature(event) {
     event.preventDefault();
     if (!feature) return;
-    setPostData((previous) => ({...previous, 'features': [...previous.features, feature]}))
+    setPostData((previous) => ({...previous, 'features': [...previous.features, feature]}));
     setFeature("");
   }
 
@@ -168,7 +168,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
         if (editProductData.id === product.id) {
           return { ...postData, 'table': tableAsObject, 'images': [...postData.images, ...imageURLs], 'id': editProductData.id }
         } else {
-          return product
+          return product;
         }
       }))
       document.getElementById('product-modal').close();
@@ -181,7 +181,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     for (const file of array) {
       if (file.path === image.path) return false;
     }
-    return true
+    return true;
   }
 
   function checkEmptyFormFields() {
