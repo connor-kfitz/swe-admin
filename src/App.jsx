@@ -3,7 +3,7 @@ import AuthGuard from "./guards/AuthGuard";
 import SignIn from "./pages/LoginPage";
 import ProductsPage from "./pages/ProductsPage";
 import ArticlesPage from "./pages/ArticlesPage";
-import TestimonialsPage from "./pages/TestimonialsPage";
+// import TestimonialsPage from "./pages/TestimonialsPage";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
