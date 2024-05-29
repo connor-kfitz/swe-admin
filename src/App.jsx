@@ -15,7 +15,7 @@ function App() {
           <Route exact path="/" element={<AuthGuard><Navigate to="/products"/></AuthGuard>}/>
           <Route path="/products" element={<AuthGuard><ProductsPage/></AuthGuard>}/>
           <Route path="/articles" element={<AuthGuard><ArticlesPage/></AuthGuard>}/>
-          <Route path="/testimonials" element={<AuthGuard><TestimonialsPage/></AuthGuard>}/>
+          {/* <Route path="/testimonials" element={<AuthGuard><TestimonialsPage/></AuthGuard>}/> */}
           <Route path="/login" element={<SignIn/>}/>
         </Routes>
       </AuthProvider>
