@@ -1,11 +1,11 @@
 import Navbar from "../components/Navbar"
 import ProductModal from "../components/ProductModal"
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import ProductTable from "../components/ProductTable";
 import { useState, useEffect, useRef } from "react"
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { ref, deleteObject } from "firebase/storage";
-import ProductTable from "../components/ProductTable";
 
 export default function ProductsPage() {
 
@@ -69,15 +69,15 @@ export default function ProductsPage() {
           <div className="flex flex-col">
             <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                <div className="overflow-hidden border rounded p-10 pb-16">
-                  <button className="btn mb-6 min-h-0 h-10" onClick={() => document.getElementById('product-modal').showModal()}>Add</button>
+                <div className="overflow-hidden border rounded p-10">
+                  <button className="btn min-h-0 h-10" onClick={() => document.getElementById('product-modal').showModal()}>Add</button>
                   {products.length > 0 && <ProductTable products={products} deleteProductRef={deleteProductRef} transformProductData={transformProductData}/>}
                 </div>
               </div>
             </div>
           </div>
           <ProductModal editProductData={editProductData} setEditProductData={setEditProductData} setProducts={setProducts}/>
-          <DeleteConfirmationModal deleteProductRef={deleteProductRef} deleteProduct={deleteProduct} />
+          <DeleteConfirmationModal deleteRef={deleteProductRef} deleteFunction={deleteProduct} />
           </div>
         </section>
       </main>

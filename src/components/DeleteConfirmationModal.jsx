@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function DeleteConfirmationModal({deleteProductRef, deleteProduct}) {
+export default function DeleteConfirmationModal({deleteRef, deleteFunction}) {
 
   return (
     <dialog id="delete-modal" className="modal">
@@ -11,8 +11,8 @@ export default function DeleteConfirmationModal({deleteProductRef, deleteProduct
           <form method="dialog">
             <button className="btn mr-3">Close</button>
             <button className="btn" onClick={() => {
-              deleteProduct(deleteProductRef.current)
-              deleteProductRef.current = {}
+              deleteFunction(deleteRef.current)
+              deleteRef.current = {}
             }}>Delete</button>
           </form>
         </div>
