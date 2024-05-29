@@ -19,7 +19,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="navbar bg-base-100 max-w-7xl m-auto">
+    <nav className="navbar bg-base-100 max-w-7xl m-auto py-6">
       <div className="navbar-start text-xl font-medium">
         SWExposures
       </div>
