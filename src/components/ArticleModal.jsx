@@ -1,22 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import { db, storage } from "../firebase";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, Timestamp, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 class Article {
-  constructor(title, author, datePublished, body, image, tags) {
+  constructor(title, author, datePublished, body, image, tags, createdAt) {
     this.title = title;
     this.author = author;
     this.datePublished = datePublished;
     this.body = body;
     this.image = image;
     this.tags = tags;
+    this.createdAt = createdAt;
   }
 }
 
 export default function ArticleModal({ editArticleData, setEditArticleData, setArticles }) {
 
-  const [postData, setPostData] = useState(new Article("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
+  const [postData, setPostData] = useState(new Article("", "", "", "", { file: null, filePath: "", path: "", src: "" }, [], ""));
   const [formErrors, setFormErrors] = useState({ title: false, author: false, datePublished: false, body: false });
   const [tag, setTag] = useState("");
 
@@ -24,7 +25,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
 
   useEffect(() => {
     document.getElementById('article-modal').addEventListener("close", () => {
-      setPostData(new Article("", "", "", "", {file: null, filePath: "", path: "", src: ""}, []));
+      setPostData(new Article("", "", "", "", {file: null, filePath: "", path: "", src: ""}, [], ""));
       setTag("");
       setEditArticleData(null);
       deleteImageRef.current = "";
@@ -84,9 +85,17 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
       const imageURL = await uploadFiles();
       const docRef = await addDoc(collection(db, "articles"), {
         ...postData,
-        'image': imageURL
+        'image': imageURL,
+        'datePublished': Timestamp.fromDate(new Date(postData.datePublished)),
+        'createdAt': serverTimestamp()
       })
-      setArticles((previous) => [...previous, { ...postData, 'image': imageURL, 'id': docRef.id }]);
+      setArticles((previous) => [...previous, 
+        { ...postData, 
+        'image': imageURL, 
+        'datePublished': docRef.datePublished, 
+        'createdAt': docRef.createdAt,
+        'id': docRef.id 
+        }]);
       document.getElementById('article-modal').close();
     } catch (error) {
       console.log('Failed to add article', error);
@@ -101,12 +110,19 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
       const imageURL = await uploadFiles();
       await setDoc(doc(db, "articles", editArticleData.id), {
         ...postData,
-        'image': imageURL ? imageURL : { src: postData.image.src, path: postData.image.path }
+        'image': imageURL ? imageURL : { src: postData.image.src, path: postData.image.path },
+        'datePublished': Timestamp.fromDate(new Date(postData.datePublished)),
+        'createdAt': Timestamp.fromDate(new Date (editArticleData.createdAt))
       });
 
       setArticles((previous) => previous.map((product) => {
         if (editArticleData.id === product.id) {
-          return { ...postData, 'id': editArticleData.id, 'image': imageURL ? imageURL : { src: postData.image.src, path: postData.image.path } }
+          return { ...postData,
+                  'id': editArticleData.id,
+                  'image': imageURL ? imageURL : { src: postData.image.src, path: postData.image.path },
+                  'datePublished': Timestamp.fromDate(new Date(postData.datePublished)),
+                  'createdAt': Timestamp.fromDate(new Date(editArticleData.createdAt))
+                }
         } else {
           return product;
         }

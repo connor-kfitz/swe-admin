@@ -45,16 +45,15 @@ export default function ArticlesPage() {
 
   function transformArticleData(article) {
     const transformedArticle = JSON.parse(JSON.stringify(article));
-    transformedArticle.table = objectToNestedArray(transformedArticle.table);
+    transformedArticle.datePublished = unixToDatePicker(transformedArticle.datePublished);
+    transformedArticle.createdAt = unixToDatePicker(transformedArticle.createdAt);
     setEditArticleData(transformedArticle);
   }
 
-  function objectToNestedArray(object) {
-    let nestedArray = [];
-    for (const row in object) {
-      nestedArray.push(object[row]);
-    }
-    return nestedArray;
+  function unixToDatePicker(date) {
+    if (!date) return "";
+    date = new Date(date.seconds * 1000);
+    return date.toISOString().slice(0, 10);
   }
 
   return (
