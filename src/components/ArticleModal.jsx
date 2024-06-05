@@ -97,8 +97,8 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
         'image': imageURL,
         'author': postData.author.toLowerCase(),
         'tags': arrayToLowerCase(postData.tags),
-        'datePublished': docRef.datePublished, 
-        'createdAt': docRef.createdAt,
+        'datePublished': Timestamp.fromDate(new Date(postData.datePublished)), 
+        'createdAt': Timestamp.fromDate(new Date()),
         'id': docRef.id 
         }]);
       document.getElementById('article-modal').close();
