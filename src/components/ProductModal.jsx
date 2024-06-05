@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { db, storage } from "../firebase";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { defualtProductTable } from "../common/constants";
 
 class Product {
   constructor(name, model, description, features, videoURL, images, specifications, table) {
@@ -18,7 +19,7 @@ class Product {
 
 export default function ProductModal({ editProductData, setEditProductData, setProducts }) {
 
-  const [postData, setPostData] = useState(new Product("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
+  const [postData, setPostData] = useState(new Product("", "", "", [], "", [], [], defualtProductTable));
   const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false });
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("");
@@ -26,7 +27,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
 
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
-      setPostData(new Product("", "", "", [], "", [], [], [["", ""], ["", ""], ["", ""]]));
+      setPostData(new Product("", "", "", [], "", [], [], defualtProductTable));
       setFeature("");
       setSpecification("");
       setImageUploads([]);
