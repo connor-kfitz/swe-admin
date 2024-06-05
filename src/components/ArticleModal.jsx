@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { db, storage } from "../firebase";
 import { collection, addDoc, doc, setDoc, Timestamp, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { arrayToLowerCase } from "../common/helper";
 
 class Article {
   constructor(title, author, datePublished, body, image, tags, createdAt) {
@@ -86,12 +87,16 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
       const docRef = await addDoc(collection(db, "articles"), {
         ...postData,
         'image': imageURL,
+        'author': postData.author.toLowerCase(),
+        'tags': arrayToLowerCase(postData.tags),
         'datePublished': Timestamp.fromDate(new Date(postData.datePublished)),
         'createdAt': serverTimestamp()
       })
       setArticles((previous) => [...previous, 
         { ...postData, 
-        'image': imageURL, 
+        'image': imageURL,
+        'author': postData.author.toLowerCase(),
+        'tags': arrayToLowerCase(postData.tags),
         'datePublished': docRef.datePublished, 
         'createdAt': docRef.createdAt,
         'id': docRef.id 
@@ -111,14 +116,17 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
       await setDoc(doc(db, "articles", editArticleData.id), {
         ...postData,
         'image': imageURL ? imageURL : { src: postData.image.src, path: postData.image.path },
+        'author': postData.author.toLowerCase(),
+        'tags': arrayToLowerCase(postData.tags),
         'datePublished': Timestamp.fromDate(new Date(postData.datePublished)),
         'createdAt': Timestamp.fromDate(new Date (editArticleData.createdAt))
       });
-
       setArticles((previous) => previous.map((product) => {
         if (editArticleData.id === product.id) {
           return { ...postData,
                   'id': editArticleData.id,
+                  'author': postData.author.toLowerCase(),
+                  'tags': arrayToLowerCase(postData.tags),
                   'image': imageURL ? imageURL : { src: postData.image.src, path: postData.image.path },
                   'datePublished': Timestamp.fromDate(new Date(postData.datePublished)),
                   'createdAt': Timestamp.fromDate(new Date(editArticleData.createdAt))
