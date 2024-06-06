@@ -4,7 +4,7 @@ import ArticleModal from "../components/ArticleModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import { useState, useEffect, useRef } from "react"
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
-import { db, storage } from "../firebase";
+import { db, storage } from "../firebase/firebase";
 import { ref, deleteObject } from "firebase/storage";
 
 export default function ArticlesPage() {

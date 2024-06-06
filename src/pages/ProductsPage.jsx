@@ -4,7 +4,7 @@ import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import ProductTable from "../components/ProductTable";
 import { useState, useEffect, useRef } from "react"
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
-import { db, storage } from "../firebase";
+import { db, storage } from "../firebase/firebase";
 import { ref, deleteObject } from "firebase/storage";
 
 export default function ProductsPage() {
