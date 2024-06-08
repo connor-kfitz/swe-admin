@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-private-property-in-object": "^7.24.5",
+    "ajv": "^7.2.4",
     "daisyui": "^4.11.1"
   }
 }
