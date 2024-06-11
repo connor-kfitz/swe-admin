@@ -33,12 +33,12 @@ export default function ArticlesPage() {
   }
 
   async function deleteArticle(deleteArticle) {
-    await deleteFiles(deleteArticle);
+    await deleteFile(deleteArticle);
     await deleteDoc(doc(db, "articles", deleteArticle.id));
     setArticles((previous) => previous.filter((article) => article.id !== deleteArticle.id));
   }
 
-  async function deleteFiles(article) {
+  async function deleteFile(article) {
     const imageDocRef = ref(storage, article.image.path);
     await deleteObject(imageDocRef);
   }

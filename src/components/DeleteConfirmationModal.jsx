@@ -1,7 +1,4 @@
-import React from "react";
-
 export default function DeleteConfirmationModal({deleteRef, deleteFunction}) {
-
   return (
     <dialog id="delete-modal" className="modal">
       <div className="modal-box">
