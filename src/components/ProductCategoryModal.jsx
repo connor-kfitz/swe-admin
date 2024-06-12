@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { db, storage } from "../firebase/firebase";
-import { collection, addDoc, doc, setDoc, Timestamp, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, Timestamp, serverTimestamp, query, where, getDocs, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 class ProductCategory {
@@ -59,6 +59,22 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
     setPostData((prev) => ({ ...prev, [name]: value }));
   }
 
+  async function updateProductsCategories() {
+    const productsRef = collection(db, "products");
+    const q = query(productsRef, where("category", "==", editProductCategoryData.name));
+    const querySnapshot = await getDocs(q);
+    let products = [];
+    querySnapshot.forEach((doc) => {
+      products.push(doc.id);
+    });
+    products.map(async (product) => {
+      const productRef = doc(db, "products", product);
+      await updateDoc(productRef, {
+        category: postData.name
+      })
+    })
+  }
+
   async function addProductCategory(event) {
     event.preventDefault();
     if (!checkEmptyFormFields()) return;
@@ -106,6 +122,7 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
           return product;
         }
       }))
+      await updateProductsCategories();
       document.getElementById('product-category-modal').close();
     } catch (error) {
       console.log('Failed to add article', error);
