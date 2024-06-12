@@ -121,7 +121,7 @@ export default function ProductsPage() {
               </div>
             </div>
           </div>
-          <ProductModal editProductData={editProductData} setEditProductData={setEditProductData} setProducts={setProducts}/>
+            <ProductModal editProductData={editProductData} setEditProductData={setEditProductData} setProducts={setProducts} productCategories={productCategories} />
           </div>
         </section>
         <section>

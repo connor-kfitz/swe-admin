@@ -5,21 +5,32 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage
 import { defualtProductTable } from "../common/constants";
 
 class Product {
-  constructor(name, model, description, features, videoURL, images, specifications, table) {
+  constructor(name, model, description, features, videoURL, category, images, specifications, table) {
     this.name = name;
     this.model = model;
     this.description = description;
     this.features = features;
     this.videoURL = videoURL;
+    this.category = category;
     this.images = images;
     this.specifications = specifications;
     this.table = table;
   }
+
+  name;
+  model;
+  description;
+  features;
+  videoURL;
+  category;
+  images;
+  specifications;
+  table;
 }
 
-export default function ProductModal({ editProductData, setEditProductData, setProducts }) {
+export default function ProductModal({ editProductData, setEditProductData, setProducts, productCategories }) {
 
-  const [postData, setPostData] = useState(new Product("", "", "", [], "", [], [], defualtProductTable));
+  const [postData, setPostData] = useState(new Product("", "", "", [], "", "", [], [], defualtProductTable));
   const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false });
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("");
@@ -27,7 +38,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
 
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
-      setPostData(new Product("", "", "", [], "", [], [], defualtProductTable));
+      setPostData(new Product("", "", "", [], "", "", [], [], defualtProductTable));
       setFeature("");
       setSpecification("");
       setImageUploads([]);
@@ -252,15 +263,25 @@ export default function ProductModal({ editProductData, setEditProductData, setP
                 ))}
               </ul>
             </label>
-            <label className="form-control w-full mb-9">
+            <label className="form-control w-full mb-3">
               <div className="label"> 
                 <span className="label-text">Video URL</span>
               </div>
               <input name="videoURL" type="text" onChange={handleFormChange} value={postData.videoURL} className="input input-bordered w-full"/>
             </label>
+            <label className="form-control w-full mb-9">
+              <div className="label">
+                <span className="label-text">Category</span>
+              </div>
+              <select name="category" className="select select-bordered" value={postData.category} onChange={handleFormChange}>
+                {productCategories?.map((product, index) => (
+                  <option key={index}>{product.name}</option>
+                ))}
+              </select>
+            </label>
             <div>
               <input
-                className="mb-6"
+                className="mb-6 file-input file-input-bordered w-full max-w-xs"
                 type="file"
                 onChange={(event) => {
                   if (event.target.files[0]) setImageUploads((previous) => [...previous, {file:event.target.files[0], path: URL.createObjectURL(event.target.files[0])}]);
