@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { db, storage } from "../firebase/firebase";
+import { db, storage } from "../../firebase/firebase";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { defualtProductTable } from "../common/constants";
+import { defualtProductTable } from "../../common/constants";
 
 class Product {
   constructor(name, model, description, features, videoURL, category, images, specifications, table) {

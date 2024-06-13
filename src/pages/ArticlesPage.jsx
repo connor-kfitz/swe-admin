@@ -1,7 +1,7 @@
-import Navbar from "../components/Navbar"
-import ArticleTable from "../components/ArticleTable";
-import ArticleModal from "../components/ArticleModal";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import Navbar from "../components/Navs/Navbar"
+import ArticleTable from "../components/Tables/ArticleTable";
+import ArticleModal from "../components/Modals/ArticleModal";
+import DeleteConfirmationModal from "../components/Modals/DeleteConfirmationModal";
 import { useState, useEffect, useRef } from "react"
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db, storage } from "../firebase/firebase";

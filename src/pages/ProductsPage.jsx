@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar"
-import ProductModal from "../components/ProductModal"
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-import ProductTable from "../components/ProductTable";
-import ProductCategoryTable from "../components/ProductCategoryTable";
-import ProductCategoryModal from "../components/ProductCategoryModal";
+import Navbar from "../components/Navs/Navbar"
+import ProductModal from "../components/Modals/ProductModal"
+import DeleteConfirmationModal from "../components/Modals/DeleteConfirmationModal";
+import ProductTable from "../components/Tables/ProductTable";
+import ProductCategoryTable from "../components/Tables/ProductCategoryTable";
+import ProductCategoryModal from "../components/Modals/ProductCategoryModal";
 import { useState, useEffect, useRef } from "react"
 import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db, storage } from "../firebase/firebase";

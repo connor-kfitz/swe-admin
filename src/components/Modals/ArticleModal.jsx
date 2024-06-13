@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { db, storage } from "../firebase/firebase";
+import { db, storage } from "../../firebase/firebase";
 import { collection, addDoc, doc, setDoc, Timestamp, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { arrayToLowerCase } from "../common/helper";
+import { arrayToLowerCase } from "../../common/helper";
 
 class Article {
   constructor(title, author, datePublished, body, image, tags, createdAt) {
