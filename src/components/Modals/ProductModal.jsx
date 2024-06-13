@@ -35,6 +35,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("");
   const [imageUploads, setImageUploads] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
@@ -145,6 +146,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
   async function addProduct(event) {
     event.preventDefault();
     if (!checkEmptyFormFields()) return;
+    setLoading(true);
     try {
         const imageURLs = await uploadFiles();
         let tableAsObject = {};
@@ -159,11 +161,13 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     } catch (error) {
         console.log('Failed to add product', error);
     }
+    setLoading(false);
   }
 
   async function editProduct(event) {
     event.preventDefault();
     if (!checkEmptyFormFields()) return;
+    setLoading(true);
     try {
       const imageURLs = await uploadFiles();
       const deletedImages = editProductData.images.filter((image) => checkRemovedExistingImages(image, [...postData.images, ...imageURLs]));
@@ -187,6 +191,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     } catch (error) {
       console.log('Failed to add product', error);
     }
+    setLoading(false);
   }
 
   function checkRemovedExistingImages(image, array) {
@@ -331,9 +336,15 @@ export default function ProductModal({ editProductData, setEditProductData, setP
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
               {editProductData ? 
-                <button className="btn" onClick={editProduct}>Edit</button> 
+                <button className="btn" onClick={editProduct}>
+                  Edit
+                  {loading && <span className="loading loading-spinner w-4"></span>}
+                </button> 
               : 
-                <button className="btn" onClick={addProduct}>Add</button>
+                <button className="btn" onClick={addProduct}>
+                  Add
+                  {loading && <span className="loading loading-spinner w-4"></span>}
+                </button>
               }
             </div>
           </form>

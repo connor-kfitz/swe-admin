@@ -21,6 +21,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
   const [postData, setPostData] = useState(new Article("", "", "", "", { file: null, filePath: "", path: "", src: "" }, [], ""));
   const [formErrors, setFormErrors] = useState({ title: false, author: false, datePublished: false, body: false });
   const [tag, setTag] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const deleteImageRef = useRef("");
 
@@ -82,6 +83,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
   async function addArticle(event) {
     event.preventDefault();
     if (!checkEmptyFormFields()) return;
+    setLoading(true);
     try {
       const imageURL = await uploadFiles();
       const docRef = await addDoc(collection(db, "articles"), {
@@ -105,11 +107,13 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
     } catch (error) {
       console.log('Failed to add article', error);
     }
+    setLoading(false);
   }
 
   async function editArticle(event) {
     event.preventDefault();
     if (!checkEmptyFormFields()) return;
+    setLoading(true);
     try {
       if (deleteImageRef.current) deleteFile(deleteImageRef.current);
       const imageURL = await uploadFiles();
@@ -139,6 +143,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
     } catch (error) {
       console.log('Failed to add article', error);
     }
+    setLoading(false);
   }
 
   function checkEmptyFormFields() {
@@ -216,9 +221,15 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
               {editArticleData ?
-                <button className="btn" onClick={editArticle}>Edit</button>
+                <button className="btn" onClick={editArticle}>
+                  Edit
+                  {loading && <span className="loading loading-spinner w-4"></span>}
+                </button>
                 :
-                <button className="btn" onClick={addArticle}>Add</button>
+                <button className="btn" onClick={addArticle}>
+                  Add
+                  {loading && <span className="loading loading-spinner w-4"></span>}
+                </button>
               }
             </div>
           </form>

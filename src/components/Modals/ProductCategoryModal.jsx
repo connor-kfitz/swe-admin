@@ -13,6 +13,7 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
 
   const [postData, setPostData] = useState(new ProductCategory("", "", "", "", { file: null, filePath: "", path: "", src: "" }, [], ""));
   const [formErrors, setFormErrors] = useState({ name: false });
+  const [loading, setLoading] = useState(false);
 
   const deleteImageRef = useRef("");
 
@@ -78,6 +79,7 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
   async function addProductCategory(event) {
     event.preventDefault();
     if (!checkEmptyFormFields()) return;
+    setLoading(true);
     try {
       const imageURL = await uploadFiles();
       const docRef = await addDoc(collection(db, "productCategories"), {
@@ -96,12 +98,13 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
     } catch (error) {
       console.log('Failed to add article', error);
     }
+    setLoading(false);
   }
 
   async function editProductCategory(event) {
     event.preventDefault();
-    console.log(editProductCategoryData);
     if (!checkEmptyFormFields()) return;
+    setLoading(true);
     try {
       if (deleteImageRef.current) deleteFile(deleteImageRef.current);
       const imageURL = await uploadFiles();
@@ -127,6 +130,7 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
     } catch (error) {
       console.log('Failed to add article', error);
     }
+    setLoading(false);
   }
 
   function checkEmptyFormFields() {
@@ -166,9 +170,15 @@ export default function ProductCategoryModal({ editProductCategoryData, setEditP
             <div className="flex justify-end mt-10">
               <button className="btn mr-3">Close</button>
               {editProductCategoryData ?
-                <button className="btn" onClick={editProductCategory}>Edit</button>
+                <button className="btn" onClick={editProductCategory}>
+                  Edit
+                  {loading && <span className="loading loading-spinner w-4"></span>}
+                </button>
                 :
-                <button className="btn" onClick={addProductCategory}>Add</button>
+                <button className="btn" onClick={addProductCategory}>
+                  Add
+                  {loading && <span className="loading loading-spinner w-4"></span>}
+                </button>
               }
             </div>
           </form>
