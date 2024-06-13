@@ -1,4 +1,4 @@
-import Navbar from "../components/navs/Navbar";
+import Navbar from "../components/navsss/Navbar";
 import ProductModal from "../components/modals/ProductModal"
 import DeleteConfirmationModal from "../components/modals/DeleteConfirmationModal";
 import ProductTable from "../components/tables/ProductTable";

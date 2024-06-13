@@ -1,5 +1,5 @@
 import React from "react"
-import Navbar from "../components/navs/Navbar";
+import Navbar from "../components/navsss/Navbar";
 
 export default function TestimonialsPage() {
   return (

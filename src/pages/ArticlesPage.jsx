@@ -1,4 +1,4 @@
-import Navbar from "../components/navs/Navbar";
+import Navbar from "../components/navsss/Navbar";
 import ArticleTable from "../components/tables/ArticleTable";
 import ArticleModal from "../components/modals/ArticleModal";
 import DeleteConfirmationModal from "../components/modals/DeleteConfirmationModal";
