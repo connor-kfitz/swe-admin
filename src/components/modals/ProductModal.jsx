@@ -56,10 +56,10 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     const filePathName = postData.model.replace(/\s/g, "");
     let imageURLs = [];
     for (let image of imageUploads) {
-      const imageRef = ref(storage, `images/${filePathName}/${image.file.name}`);
+      const imageRef = ref(storage, `images/products/${filePathName}/${image.file.name}`);
       const upload = await uploadBytes(imageRef, image.file);
       const url = await getDownloadURL(upload.ref);
-      imageURLs.push({ src: url, path: `images/${filePathName}/${image.file.name}`});
+      imageURLs.push({ src: url, path: `images/products/${filePathName}/${image.file.name}`});
     }
     return imageURLs;
   };
