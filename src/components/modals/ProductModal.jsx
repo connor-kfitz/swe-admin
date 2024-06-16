@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, storage } from "../../firebase/firebase";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -37,6 +37,8 @@ export default function ProductModal({ editProductData, setEditProductData, setP
   const [imageUploads, setImageUploads] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const fileRef = useRef(null);
+
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
       setPostData(new Product("", "", "", [], "", "", [], [], defualtProductTable));
@@ -44,6 +46,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
       setSpecification("");
       setImageUploads([]);
       setEditProductData(null);
+      fileRef.current.value = "";
     });
   });
 
@@ -207,6 +210,14 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     return false;
   }
 
+  function generateImageUploads(files) {
+    let imageObjects = [];
+    for (const file of files) {
+      imageObjects.push({ file: file, path: URL.createObjectURL(file) })
+    }
+    return imageObjects
+  }
+
   return (
     <dialog id="product-modal" className="modal">
       <div className="modal-box max-w-4xl">
@@ -288,8 +299,10 @@ export default function ProductModal({ editProductData, setEditProductData, setP
               <input
                 className="mb-6 file-input file-input-bordered w-full max-w-xs"
                 type="file"
+                multiple
+                ref={fileRef}
                 onChange={(event) => {
-                  if (event.target.files[0]) setImageUploads((previous) => [...previous, {file:event.target.files[0], path: URL.createObjectURL(event.target.files[0])}]);
+                  if (event.target.files[0]) setImageUploads((previous) => [...previous, ...generateImageUploads(event.target.files)]);
                 }}
               />
               <ul className="flex flex-wrap">
