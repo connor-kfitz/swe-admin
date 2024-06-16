@@ -54,6 +54,10 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     if (editProductData) setPostData(editProductData);
   }, [editProductData]);
 
+  useEffect(() => {
+    if (productCategories.length) setPostData((previous) => ({ ...previous, 'category': productCategories[0].name })) 
+  }, [productCategories])
+
   async function uploadFiles () {
     if (!imageUploads) return;
     const filePathName = postData.model.replace(/\s/g, "");
