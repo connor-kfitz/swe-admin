@@ -24,6 +24,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
   const [loading, setLoading] = useState(false);
 
   const deleteImageRef = useRef("");
+  const fileRef = useRef(null);
 
   useEffect(() => {
     document.getElementById('article-modal').addEventListener("close", () => {
@@ -31,6 +32,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
       setTag("");
       setEditArticleData(null);
       deleteImageRef.current = "";
+      fileRef.current.value = "";
     });
   });;
 
@@ -207,6 +209,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
               <input
                 className="mb-6"
                 type="file"
+                ref={fileRef}
                 onChange={(event) => { if (event.target.files[0]) setImage(event) }}
               />
               <div className="flex flex-wrap">
