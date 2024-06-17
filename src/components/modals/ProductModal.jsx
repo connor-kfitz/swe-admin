@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { db, storage } from "../../firebase/firebase";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { defualtProductTable } from "../../common/constants";
 
@@ -161,9 +161,16 @@ export default function ProductModal({ editProductData, setEditProductData, setP
         const docRef = await addDoc(collection(db, "products"), {
             ...postData, 
             'table': tableAsObject, 
-            'images': imageURLs
+            'images': imageURLs,
+            'createdAt': serverTimestamp()
         })
-        setProducts((previous) => [...previous, { ...postData, 'table': tableAsObject, 'images': imageURLs, 'id': docRef.id }]);
+        setProducts((previous) => [...previous, 
+          { ...postData,
+            'table': tableAsObject,
+            'images': imageURLs,
+            'createdAt': Timestamp.fromDate(new Date()),
+            'id': docRef.id
+          }]);
         document.getElementById('product-modal').close();
     } catch (error) {
         console.log('Failed to add product', error);
@@ -184,12 +191,19 @@ export default function ProductModal({ editProductData, setEditProductData, setP
       await setDoc(doc(db, "products", editProductData.id), {
         ...postData, 
         'table': tableAsObject,
-        'images': [...postData.images, ...imageURLs]
+        'images': [...postData.images, ...imageURLs],
+        'createdAt': new Timestamp(editProductData.createdAt.seconds, editProductData.createdAt.nanoseconds)
       });
 
       setProducts((previous) => previous.map((product) => { 
         if (editProductData.id === product.id) {
-          return { ...postData, 'table': tableAsObject, 'images': [...postData.images, ...imageURLs], 'id': editProductData.id }
+          return { 
+            ...postData,
+            'table': tableAsObject,
+            'images': [...postData.images, ...imageURLs],
+            'id': editProductData.id,
+            'createdAt': new Timestamp(editProductData.createdAt.seconds, editProductData.createdAt.nanoseconds) 
+          }
         } else {
           return product;
         }
