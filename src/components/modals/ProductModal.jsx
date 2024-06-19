@@ -30,7 +30,7 @@ class Product {
 
 export default function ProductModal({ editProductData, setEditProductData, setProducts, productCategories }) {
 
-  const [postData, setPostData] = useState(new Product("", "", "", [], "", productCategories[0] || "", [], [], defualtProductTable));
+  const [postData, setPostData] = useState(new Product("", "", "", [], "", productCategories[0].name || "", [], [], defualtProductTable));
   const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false });
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("");
@@ -41,7 +41,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
 
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
-      setPostData(new Product("", "", "", [], "", productCategories[0] || "", [], [], defualtProductTable));
+      setPostData(new Product("", "", "", [], "", productCategories[0].name || "", [], [], defualtProductTable));
       setFeature("");
       setSpecification("");
       setImageUploads([]);
