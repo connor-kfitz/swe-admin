@@ -41,7 +41,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
 
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
-      setPostData(new Product("", "", "", [], "", productCategories[0].name || "", [], [], defualtProductTable));
+      setPostData(new Product("", "", "", [], "", productCategories[0]?.name || "", [], [], defualtProductTable));
       setFeature("");
       setSpecification("");
       setImageUploads([]);
@@ -55,7 +55,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
   }, [editProductData]);
 
   useEffect(() => {
-    if (productCategories.length) setPostData((previous) => ({ ...previous, 'category': productCategories[0].name })) 
+    if (productCategories.length) setPostData((previous) => ({ ...previous, 'category': productCategories[0]?.name })) 
   }, [productCategories])
 
   async function uploadFiles () {

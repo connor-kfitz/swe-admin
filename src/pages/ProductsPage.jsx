@@ -68,7 +68,6 @@ export default function ProductsPage() {
   }
 
   async function deleteProductCategory(deleteProductCategory) {
-    await deleteFile(deleteProductCategory);
     await deleteDoc(doc(db, "productCategories", deleteProductCategory.id));
     setProductCategories((previous) => previous.filter((productCategory) => productCategory.id !== deleteProductCategory.id));
   }
@@ -78,11 +77,6 @@ export default function ProductsPage() {
       const imageDocRef = ref(storage, image.path);
       await deleteObject(imageDocRef);
     }
-  }
-
-  async function deleteFile(article) {
-    const imageDocRef = ref(storage, article.image.path);
-    await deleteObject(imageDocRef);
   }
 
   function transformProductData(product) {
