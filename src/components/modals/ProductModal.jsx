@@ -30,8 +30,8 @@ class Product {
 
 export default function ProductModal({ editProductData, setEditProductData, setProducts, productCategories }) {
 
-  const [postData, setPostData] = useState(new Product("", "", "", [], "", productCategories[0].name || "", [], [], defualtProductTable));
-  const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false });
+  const [postData, setPostData] = useState(new Product("", "", "", [], "", productCategories[0]?.name || "", [], [], defualtProductTable));
+  const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false, images: false });
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("");
   const [imageUploads, setImageUploads] = useState([]);
