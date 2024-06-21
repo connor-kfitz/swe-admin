@@ -207,7 +207,7 @@ export default function ArticleModal({ editArticleData, setEditArticleData, setA
             </label>
             <div>
               <input
-                className="mb-6"
+                className="mb-6 file-input file-input-bordered"
                 type="file"
                 ref={fileRef}
                 onChange={(event) => { if (event.target.files[0]) setImage(event) }}

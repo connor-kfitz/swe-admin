@@ -66,6 +66,7 @@ export default function ArticlesPage() {
               <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                   <div className="overflow-hidden border rounded p-10">
+                    <h2 className="text-lg font-bold mb-6">Articles</h2>
                     <button className="btn min-h-0 h-10" onClick={() => document.getElementById('article-modal').showModal()}>Add</button>
                     {articles.length > 0 && <ArticleTable articles={articles} deleteArticleRef={deleteArticleRef} transformArticleData={transformArticleData} />}
                   </div>
