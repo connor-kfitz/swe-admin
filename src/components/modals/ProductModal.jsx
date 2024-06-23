@@ -5,14 +5,13 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage
 import { defualtProductTable } from "../../common/constants";
 
 class Product {
-  constructor(name, model, description, features, videoURL, category, images, specifications, table) {
+  constructor(name, model, description, features, videoURL, category, specifications, table) {
     this.name = name;
     this.model = model;
     this.description = description;
     this.features = features;
     this.videoURL = videoURL;
     this.category = category;
-    this.images = images;
     this.specifications = specifications;
     this.table = table;
   }
@@ -23,50 +22,63 @@ class Product {
   features;
   videoURL;
   category;
-  images;
   specifications;
   table;
 }
 
-export default function ProductModal({ editProductData, setEditProductData, setProducts, productCategories }) {
+const initialDnDState = {
+  draggedFrom: null,
+  draggedTo: null,
+  isDragging: false,
+  originalOrder: [],
+  updatedOrder: []
+}
 
-  const [postData, setPostData] = useState(new Product("", "", "", [], "", productCategories[0]?.name || "", [], [], defualtProductTable));
+export default function ProductModal({ editProductData, setEditProductData, setProducts, productCategories }) {
+  const [postData, setPostData] = useState(new Product("", "", "", [], "", productCategories[0]?.name || "", [], defualtProductTable));
   const [formErrors, setFormErrors] = useState({ name: false, model: false, description: false, images: false });
   const [feature, setFeature] = useState("");
   const [specification, setSpecification] = useState("");
-  const [imageUploads, setImageUploads] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
+  const [dragAndDrop, setDragAndDrop] = useState(initialDnDState);
 
   const fileRef = useRef(null);
 
   useEffect(() => {
     document.getElementById('product-modal').addEventListener("close", () => {
-      setPostData(new Product("", "", "", [], "", productCategories[0]?.name || "", [], [], defualtProductTable));
+      setPostData(new Product("", "", "", [], "", productCategories[0]?.name || "", [], defualtProductTable));
       setFeature("");
       setSpecification("");
-      setImageUploads([]);
+      setImages([]);
       setEditProductData(null);
       fileRef.current.value = "";
     });
   });
 
   useEffect(() => {
-    if (editProductData) setPostData(editProductData);
+    if (editProductData) {
+      setPostData(editProductData);
+      setImages(editProductData.images);
+    }
   }, [editProductData]);
 
   useEffect(() => {
     if (productCategories.length) setPostData((previous) => ({ ...previous, 'category': productCategories[0]?.name })) 
   }, [productCategories])
 
-  async function uploadFiles () {
-    if (!imageUploads) return;
+  async function uploadFiles(uploads) {
     const filePathName = postData.model.replace(/\s/g, "");
     let imageURLs = [];
-    for (let image of imageUploads) {
-      const imageRef = ref(storage, `images/products/${filePathName}/${image.file.name}`);
-      const upload = await uploadBytes(imageRef, image.file);
-      const url = await getDownloadURL(upload.ref);
-      imageURLs.push({ src: url, path: `images/products/${filePathName}/${image.file.name}`});
+    for (let image of uploads) {
+      if (image.file) {
+        const imageRef = ref(storage, `images/products/${filePathName}/${image.file.name}`);
+        const upload = await uploadBytes(imageRef, image.file);
+        const url = await getDownloadURL(upload.ref);
+        imageURLs.push({ src: url, path: `images/products/${filePathName}/${image.file.name}` });
+      } else {
+        imageURLs.push(image);
+      }
     }
     return imageURLs;
   };
@@ -109,12 +121,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
 
   function removeImage(event, deleteIndex) {
     event.preventDefault();
-    setImageUploads((previous) => [...previous.filter((image, index) => index !== deleteIndex)]);
-  }
-
-  function removeEditImage(event, imageSRC) {
-    event.preventDefault();
-    setPostData((previous) => ({ ...previous, 'images': [...previous.images.filter((src) => src !== imageSRC)]}));
+    setImages((previous) => [...previous.filter((image, index) => index !== deleteIndex)]);
   }
 
   function addTableRow(event) {
@@ -155,7 +162,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     if (!checkEmptyFormFields()) return;
     setLoading(true);
     try {
-        const imageURLs = await uploadFiles();
+        const imageURLs = await uploadFiles(images);
         let tableAsObject = {};
         postData.table.forEach((row, index) => { tableAsObject[index] = row });
         const docRef = await addDoc(collection(db, "products"), {
@@ -183,15 +190,15 @@ export default function ProductModal({ editProductData, setEditProductData, setP
     if (!checkEmptyFormFields()) return;
     setLoading(true);
     try {
-      const imageURLs = await uploadFiles();
-      const deletedImages = editProductData.images.filter((image) => checkRemovedExistingImages(image, [...postData.images, ...imageURLs]));
+      const imageURLs = await uploadFiles(images);
+      const deletedImages = editProductData.images.filter((image) => checkRemovedExistingImages(image, [...images, ...imageURLs]));
       await deleteFiles(deletedImages);
       let tableAsObject = {};
       postData.table.forEach((row, index) => { tableAsObject[index] = row });
       await setDoc(doc(db, "products", editProductData.id), {
         ...postData, 
         'table': tableAsObject,
-        'images': [...postData.images, ...imageURLs],
+        'images': imageURLs,
         'createdAt': new Timestamp(editProductData.createdAt.seconds, editProductData.createdAt.nanoseconds)
       });
 
@@ -200,7 +207,7 @@ export default function ProductModal({ editProductData, setEditProductData, setP
           return { 
             ...postData,
             'table': tableAsObject,
-            'images': [...postData.images, ...imageURLs],
+            'images': imageURLs,
             'id': editProductData.id,
             'createdAt': new Timestamp(editProductData.createdAt.seconds, editProductData.createdAt.nanoseconds) 
           }
@@ -234,6 +241,58 @@ export default function ProductModal({ editProductData, setEditProductData, setP
       imageObjects.push({ file: file, path: URL.createObjectURL(file) })
     }
     return imageObjects
+  }
+
+  function onDragStart(event) {
+    const initialPosition = Number(event.currentTarget.dataset.position);
+
+    setDragAndDrop({
+      ...dragAndDrop,
+      draggedFrom: initialPosition,
+      isDragging: true,
+      originalOrder: images
+    });
+  }
+
+  function onDragOver(event) {
+    event.preventDefault();
+
+    let newList = dragAndDrop.originalOrder;
+    const draggedFrom = dragAndDrop.draggedFrom;
+    const draggedTo = Number(event.currentTarget.dataset.position);
+    const itemDragged = newList[draggedFrom];
+    const remainingItems = newList.filter((item, index) => index !== draggedFrom);
+
+    newList = [
+      ...remainingItems.slice(0, draggedTo),
+      itemDragged,
+      ...remainingItems.slice(draggedTo)
+    ];
+
+    if (draggedTo !== dragAndDrop.draggedTo) {
+      setDragAndDrop({
+        ...dragAndDrop,
+        updatedOrder: newList,
+        draggedTo: draggedTo
+      })
+    }
+  }
+
+  function onDrop() {
+    setImages(dragAndDrop.updatedOrder);
+    setDragAndDrop({
+      ...dragAndDrop,
+      draggedFrom: null,
+      draggedTo: null,
+      isDragging: false
+    });
+  }
+
+  function onDragLeave() {
+    setDragAndDrop({
+      ...dragAndDrop,
+      draggedTo: null
+    });
   }
 
   return (
@@ -320,21 +379,17 @@ export default function ProductModal({ editProductData, setEditProductData, setP
                 multiple
                 ref={fileRef}
                 onChange={(event) => {
-                  if (event.target.files[0]) setImageUploads((previous) => [...previous, ...generateImageUploads(event.target.files)]);
+                  if (event.target.files[0]) setImages((previous) => [...previous, ...generateImageUploads(event.target.files)]);
                 }}
               />
-              <ul className="flex flex-wrap">
-                {imageUploads.map((image, index) => (
-                  <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
-                    <img className="" src={image.path} alt="Upload Preview"/>
-                    <button className="btn h-full rounded-s-none" onClick={(event) => removeImage(event, index)}>X</button>
-                  </li>
-                ))}
-                {postData.images.map((image, index) => (
-                  <li className="h-36 max-h-36 mr-3 mb-3 flex" key={index}>
-                    <img className="" src={image.src} alt="Upload Preview"/>
-                    <button className="btn h-full rounded-s-none" onClick={(event) => removeEditImage(event, image)}>X</button>
-                  </li>
+              <ul className="mb-6">
+                {images.map((image, index) => (
+                  <li className="flex items-center justify-center h-28 max-h-28 bg-base-200 rounded-lg mb-3 hover:bg-slate-300 cursor-move" 
+                  data-position={index} draggable onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop} onDragLeave={onDragLeave} key={index}>
+                    <div className={"font-bold pointer-events-none" + (dragAndDrop && dragAndDrop.draggedTo === Number(index) ? "" : " hidden")} >Drop Here</div>
+                    <img className={"mr-auto h-full pointer-events-none" + (dragAndDrop && dragAndDrop.draggedTo === Number(index) ? " hidden" : "")} src={image.src || image.path} alt="Product"/>
+                    <button className={"btn bg-base-100 mr-6" + (dragAndDrop && dragAndDrop.draggedTo === Number(index) ? " hidden" : "")} onClick={(event) => removeImage(event, index)}>Delete</button>
+                </li>
                 ))}
               </ul>
             </div>
